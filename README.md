@@ -291,6 +291,13 @@ O histórico de desenvolvimento, as decisões técnicas, os resultados dos teste
 
 [`RELATORIO_EXECUCAO.md`](RELATORIO_EXECUCAO.md)
 
+
 ## 16. Licença
 
 Consulte o arquivo `LICENSE` para informações sobre a licença do projeto.
+
+## Demonstração
+
+Confira o vídeo de demonstração do Note Organizer:
+
+[Assistir à demonstração no YouTube](https://youtu.be/LAK1vtOupLo)
