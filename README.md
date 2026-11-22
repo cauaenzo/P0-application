@@ -349,13 +349,15 @@ Apesar da evolução da estrutura e do tratamento de erros, algumas limitações
 
 Essas limitações podem ser abordadas em etapas futuras do desenvolvimento.
 
-## 13. Demonstração
+## 13. Demonstrações
 
 A demonstração em vídeo da versão Intermediária será disponibilizada após a gravação e validação da execução correspondente.
 
 A demonstração da versão Básica está disponível em:
 
-[Assistir à demonstração do P0 Básico](https://youtu.be/LAK1vtOupLo)
+- **Nível Básico:**  [Assistir ao vídeo](https://youtu.be/LAK1vtOupLo)
+- **Nível Intermediário:**  [Assistir ao vídeo](https://youtu.be/01WqEZIUJuk)
+- **Nível Intermediário:** em desenvolvimento...
 
 ## 14. Relatório de execução
 
