@@ -1,63 +1,66 @@
 
-import os
-
 import requests
-from dotenv import load_dotenv
 
-
-load_dotenv()
+from app.config import load_llm_config
 
 
 class LLMClientError(Exception):
     """Representa erros durante a comunicação com o serviço de LLM."""
 
 
-def get_llm_configuration():
-    """Carrega e valida as configurações necessárias para acessar o LLM."""
+def prepare_request(system_prompt: str, user_text: str, config):
+    """Prepara os dados necessários para a requisição."""
 
-    api_key = os.getenv("LLM_API_KEY")
-    base_url = os.getenv("LLM_BASE_URL")
-    model = os.getenv("LLM_MODEL")
-
-    if not api_key:
-        raise LLMClientError("A variável LLM_API_KEY não foi configurada.")
-
-    if not base_url:
-        raise LLMClientError("A variável LLM_BASE_URL não foi configurada.")
-
-    if not model:
-        raise LLMClientError("A variável LLM_MODEL não foi configurada.")
-
-    return api_key, base_url.rstrip("/"), model
-
-
-def generate_response(system_prompt: str, user_text: str) -> str:
-    """Envia um texto ao LLM e retorna o conteúdo da resposta."""
-
-    api_key, base_url, model = get_llm_configuration()
-
-    endpoint = f"{base_url}/chat/completions"
+    endpoint = f"{config.base_url.rstrip('/')}/chat/completions"
 
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {config.api_key}",
         "Content-Type": "application/json"
     }
 
     payload = {
-        "model": model,
+        "model": config.model,
         "messages": [
-            {
-                "role": "system",
-                "content": system_prompt
-            },
-            {
-                "role": "user",
-                "content": user_text
-            }
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_text}
         ],
         "stream": False,
         "max_tokens": 2048
     }
+
+    return endpoint, headers, payload
+
+
+def parse_response(response) -> str:
+    """Valida e extrai o conteúdo retornado pelo modelo."""
+
+    try:
+        data = response.json()
+        content = data["choices"][0]["message"]["content"]
+
+    except (ValueError, KeyError, IndexError, TypeError) as error:
+        raise LLMClientError(
+            "Não foi possível interpretar a resposta do modelo."
+        ) from error
+
+    if not isinstance(content, str) or not content.strip():
+        raise LLMClientError(
+            "O modelo retornou uma resposta vazia ou inválida."
+        )
+
+    return content.strip()
+
+
+def generate_response(system_prompt: str, user_text: str) -> str:
+    """Envia uma solicitação ao LLM e retorna sua resposta."""
+
+    config = load_llm_config()
+
+    endpoint, headers, payload = prepare_request(
+        system_prompt,
+        user_text,
+        config
+    )
 
     try:
         response = requests.post(
@@ -80,28 +83,31 @@ def generate_response(system_prompt: str, user_text: str) -> str:
         ) from error
 
     except requests.exceptions.HTTPError as error:
-        raise LLMClientError(
-            f"O serviço retornou um erro HTTP: {error.response.status_code}."
-        ) from error
+        status_code = (
+            error.response.status_code
+            if error.response is not None
+            else None
+        )
+
+        messages = {
+            401: "A credencial de acesso é inválida.",
+            403: "A credencial não possui autorização para acessar o serviço.",
+            404: "O modelo ou endpoint solicitado não foi encontrado.",
+            429: "O limite de requisições do serviço foi atingido.",
+        }
+
+        if status_code in messages:
+            message = messages[status_code]
+        elif status_code is not None and status_code >= 500:
+            message = "O serviço de LLM está temporariamente indisponível."
+        else:
+            message = "O serviço de LLM recusou a solicitação."
+
+        raise LLMClientError(message) from error
 
     except requests.exceptions.RequestException as error:
         raise LLMClientError(
-            "Ocorreu um erro durante a requisição."
+            "Ocorreu um erro durante a comunicação com o serviço."
         ) from error
 
-    try:
-        data = response.json()
-
-        content = data["choices"][0]["message"]["content"]
-
-    except (ValueError, KeyError, IndexError, TypeError) as error:
-        raise LLMClientError(
-            "Não foi possível interpretar a resposta do modelo."
-        ) from error
-
-    if not isinstance(content, str) or not content.strip():
-        raise LLMClientError(
-            "O modelo retornou uma resposta vazia ou inválida."
-        )
-
-    return content.strip()
+    return parse_response(response)
