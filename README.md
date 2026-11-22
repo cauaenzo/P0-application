@@ -1,63 +1,77 @@
-# P0 — Organizador de Anotações
+# P0 — Note Organizer
 
-Aplicação em Python que utiliza um Large Language Model (LLM) para transformar anotações textuais livres em informações organizadas, identificando títulos, resumos, pontos importantes e possíveis ações.
+Aplicação de linha de comando desenvolvida em Python para organizar anotações textuais utilizando um modelo de linguagem (LLM).
 
-Este projeto corresponde ao nível **Básico da entrega P0**, cujo objetivo é demonstrar um primeiro ciclo de desenvolvimento de uma aplicação funcional com integração a um serviço de inteligência artificial.
+O projeto recebe uma anotação escrita pelo usuário e utiliza a NVIDIA NIM para gerar uma versão estruturada, contendo título, resumo, pontos importantes e ações identificadas.
 
-## 1. Problema
+O desenvolvimento está organizado em três níveis de evolução: Básico, Intermediário e Avançado.
 
-Anotações feitas durante reuniões, aulas, estudos e atividades cotidianas frequentemente são registradas em linguagem natural, sem uma estrutura definida. Isso pode dificultar a identificação posterior das informações principais, dos compromissos e das tarefas mencionadas.
+## 1. Objetivo
 
-O Note Organizer propõe uma solução simples para esse problema: receber um texto livre e organizá-lo em seções que facilitem sua leitura e compreensão.
+O objetivo do projeto é desenvolver uma aplicação capaz de transformar anotações livres em informações mais organizadas, facilitando sua leitura e compreensão.
 
-## 2. Público-alvo
+A aplicação utiliza um modelo de linguagem para interpretar o conteúdo fornecido e produzir uma resposta estruturada, contendo título, resumo, pontos importantes e ações identificadas, buscando preservar o significado original da anotação.
 
-A aplicação é destinada a pessoas que registram informações em texto livre e desejam organizá-las com menos esforço, especialmente estudantes e pessoas que precisam revisar anotações de reuniões, atividades e tarefas.
+O público-alvo inclui estudantes e pessoas que trabalham com anotações textuais e desejam transformar registros livres em informações mais estruturadas, facilitando a identificação de assuntos importantes e atividades a serem realizadas.
 
-## 3. Justificativa para utilização de um LLM
+A utilização de um modelo de linguagem permite interpretar anotações escritas livremente, mesmo quando apresentam estruturas, vocabulários e formas de expressão diferentes. Uma abordagem baseada exclusivamente em regras fixas exigiria definir previamente diversos padrões de entrada, tornando a solução menos flexível diante de textos variados.
 
-A linguagem utilizada em anotações livres pode variar bastante. Uma mesma informação pode ser expressa de diferentes maneiras, com abreviações, frases incompletas, informações distribuídas pelo texto e diferentes níveis de contextualização.
+## 2. Funcionalidades
 
-Uma abordagem baseada exclusivamente em regras fixas exigiria a definição de padrões específicos para reconhecer essas variações.
+### P0 — Básico
 
-A utilização de um LLM permite interpretar textos em linguagem natural e identificar relações contextuais entre as informações, produzindo uma organização mais flexível.
+- Recebimento de anotações pelo terminal.
+- Integração com a NVIDIA NIM por meio de requisições HTTP.
+- Organização do conteúdo em título, resumo, pontos importantes e ações.
+- Configuração do modelo e das credenciais por variáveis de ambiente.
+- Separação inicial das responsabilidades em módulos.
+- Testes unitários da funcionalidade principal.
 
-O modelo recebe instruções específicas para preservar o significado original, não inventar informações e identificar responsáveis e prazos somente quando estiverem explicitamente presentes no texto.
+### P0 — Intermediário
 
-A utilização do LLM não elimina a necessidade de revisão humana: o resultado deve ser conferido pelo usuário.
+- Validação das configurações necessárias para acessar o serviço de LLM.
+- Verificação da presença da credencial, endereço do serviço e identificação do modelo.
+- Validação do formato do endereço configurado.
+- Preparação da requisição em uma função específica.
+- Separação entre envio da requisição e interpretação da resposta.
+- Tratamento de falhas de conexão, timeout e erros HTTP.
+- Identificação de respostas vazias, inválidas ou inesperadas.
+- Exibição de mensagens de erro compreensíveis no terminal.
+- Ampliação da cobertura de testes automatizados, utilizando simulação das respostas do serviço externo.
 
-## 4. Funcionamento da solução
+### P0 — Avançado
 
-A aplicação funciona por meio de uma interface de terminal e de uma integração HTTP com a NVIDIA NIM, utilizando uma API compatível com o formato Chat Completions.
+Ainda não implementado.
 
-O fluxo de execução é composto pelas seguintes etapas:
+## 3. Tecnologias utilizadas
 
-1. O usuário informa uma anotação pelo terminal.
-2. O módulo `organizer.py` valida a entrada e prepara o texto.
-3. O módulo `prompts.py` fornece as instruções que orientam a organização.
-4. O módulo `llm_client.py` envia as instruções e a anotação ao modelo configurado.
-5. A resposta é processada e apresentada no terminal pelo módulo `main.py`.
+- **Python:** linguagem de programação.
+- **Requests:** realização de requisições HTTP.
+- **Python-dotenv:** carregamento de variáveis de ambiente a partir de arquivos `.env`.
+- **Unittest:** execução dos testes automatizados.
+- **Unittest.mock:** simulação de componentes externos durante os testes.
+- **NVIDIA NIM:** serviço de inferência utilizado para gerar as respostas do modelo.
 
-### Estrutura esperada da resposta
-
-- **Título:** representação breve do conteúdo.
-- **Resumo:** síntese das principais informações.
-- **Pontos importantes:** assuntos e informações relevantes.
-- **Ações identificadas:** tarefas mencionadas, com responsáveis e prazos somente quando explicitamente informados.
-
-### Estrutura do projeto
+## 4. Estrutura do projeto
 
 ```text
 P0-application/
+│
 ├── src/
 │   └── app/
 │       ├── __init__.py
 │       ├── main.py
-│       ├── organizer.py
+│       ├── config.py
 │       ├── llm_client.py
+│       ├── organizer.py
 │       └── prompts.py
+│
 ├── tests/
+│   ├── test_config.py
+│   ├── test_llm_client.py
+│   ├── test_main.py
 │   └── test_organizer.py
+│
 ├── .env.example
 ├── .gitignore
 ├── pyproject.toml
@@ -71,81 +85,80 @@ P0-application/
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `main.py` | Interface de entrada e saída pelo terminal. |
-| `organizer.py` | Validação da anotação e coordenação da organização. |
-| `llm_client.py` | Configuração e comunicação HTTP com o serviço de LLM. |
-| `prompts.py` | Definição das instruções enviadas ao modelo. |
-| `test_organizer.py` | Testes automatizados da lógica de organização. |
+| `main.py` | Captura a entrada do usuário, valida o conteúdo e apresenta o resultado ou mensagens de erro. |
+| `config.py` | Carrega e valida as configurações necessárias para acessar o serviço de LLM. |
+| `llm_client.py` | Prepara e envia requisições, trata falhas de comunicação e interpreta as respostas do modelo. |
+| `organizer.py` | Coordena o processo de organização da anotação. |
+| `prompts.py` | Armazena as instruções utilizadas para orientar o modelo de linguagem. |
 
-## 5. Limites da solução
+A pasta `tests/` contém os testes automatizados organizados conforme as responsabilidades dos módulos da aplicação.
 
-O projeto tem escopo intencionalmente limitado ao nível Básico da P0.
+## 5. Requisitos
 
-A aplicação:
-
-- Não armazena anotações em banco de dados ou arquivos.
-- Não possui interface gráfica ou aplicação web.
-- Não mantém histórico de anotações.
-- Não executa automaticamente as ações identificadas.
-- Não verifica a veracidade das informações fornecidas.
-- Não garante que todas as informações sejam classificadas corretamente.
-- Não garante respostas idênticas para entradas iguais, pois a geração depende do comportamento do modelo.
-- Não substitui a revisão do usuário sobre o conteúdo organizado.
-
-O modelo pode interpretar incorretamente informações ambíguas ou produzir classificações inadequadas. Portanto, responsáveis, prazos e ações identificados devem ser conferidos antes de serem utilizados.
-
-Como o texto é enviado a um serviço externo de inferência, não devem ser inseridas credenciais, informações pessoais sensíveis ou dados confidenciais nas anotações.
-
-## 6. Requisitos
+Para executar o projeto, são necessários:
 
 - Python 3.10 ou superior.
-- Chave de acesso autorizada à NVIDIA NIM.
 - Git.
+- Acesso à internet para comunicação com a NVIDIA NIM.
+- Uma credencial válida para acessar o serviço.
 
-## 7. Instalação
+## 6. Instalação
 
-### 7.1. Clonar o repositório
+Clone o repositório:
 
 ```bash
 git clone https://github.com/cauaenzo/P0-application.git
+```
+
+Entre na pasta do projeto:
+
+```bash
 cd P0-application
 ```
 
-### 7.2. Criar o ambiente virtual
-
-**Windows:**
+Crie um ambiente virtual:
 
 ```bash
-python -m venv venv
-venv\Scripts\activate
+python -m venv .venv
 ```
 
-**Linux/macOS:**
+Ative o ambiente virtual.
+
+**Windows — PowerShell:**
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+**Windows — Git Bash:**
 
 ```bash
-python -m venv venv
-source venv/bin/activate
+source .venv/Scripts/activate
 ```
 
-### 7.3. Instalar as dependências
+**Linux:**
+
+```bash
+source .venv/bin/activate
+```
+
+Instale as dependências:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 7.4. Instalar o projeto em modo editável
+Instale o projeto em modo editável:
 
 ```bash
 pip install -e .
 ```
 
-Essa instalação permite que o Python encontre o pacote localizado em `src/app`.
+## 7. Configuração
 
-## 8. Configuração do acesso ao LLM
+Crie um arquivo chamado `.env` na raiz do projeto, utilizando o `.env.example` como referência.
 
-A aplicação utiliza variáveis de ambiente para separar as credenciais e os parâmetros de acesso do código-fonte.
-
-Crie um arquivo `.env` na raiz do projeto, utilizando `.env.example` como referência:
+Configure as seguintes variáveis:
 
 ```env
 LLM_API_KEY=nvapi-sua-chave
@@ -153,151 +166,201 @@ LLM_BASE_URL=https://integrate.api.nvidia.com/v1
 LLM_MODEL=nvidia/nemotron-3.5-super-vl-120b-a12b
 ```
 
-Substitua `LLM_API_KEY` por uma chave válida e autorizada para utilização do serviço.
+### Variáveis de ambiente
 
-As três variáveis são necessárias:
-
-| Variável | Finalidade |
+| Variável | Descrição |
 |---|---|
-| `LLM_API_KEY` | Credencial de autenticação. |
-| `LLM_BASE_URL` | Endereço-base da API. |
-| `LLM_MODEL` | Identificador do modelo utilizado. |
+| `LLM_API_KEY` | Credencial de autenticação para acessar o serviço. |
+| `LLM_BASE_URL` | Endereço-base da API utilizada. |
+| `LLM_MODEL` | Identificação do modelo de linguagem solicitado. |
 
-**Importante:** o arquivo `.env` contém credenciais e não deve ser versionado. O `.gitignore` impede seu envio acidental ao Git. O arquivo `.env.example` documenta os parâmetros necessários sem expor segredos.
+A credencial deve ser obtida por meio de um provedor autorizado e mantida exclusivamente no arquivo `.env`.
 
-Não compartilhe sua chave de API em repositórios, vídeos, capturas de tela ou documentos públicos.
+O arquivo `.env` está incluído no `.gitignore` para evitar que credenciais sejam enviadas acidentalmente ao repositório.
 
-## 9. Execução
+**Importante:** nunca compartilhe sua chave de API ou publique credenciais no código-fonte.
 
-Com o ambiente virtual ativado, as dependências instaladas e as variáveis configuradas, execute:
+## 8. Execução
+
+Com o ambiente virtual ativado e as configurações preenchidas, execute:
 
 ```bash
 python -m app.main
 ```
 
-A aplicação solicitará uma anotação pelo terminal e apresentará o resultado organizado pelo modelo.
+A aplicação solicitará uma anotação pelo terminal.
 
-## 10. Exemplo de utilização
-
-**Entrada ilustrativa:**
+### Exemplo de entrada
 
 ```text
-Tivemos uma reunião sobre o projeto. João vai enviar
-a planilha atualizada até terça-feira. Na sexta,
-vamos conversar com Marina sobre o cronograma.
-Também precisamos revisar os requisitos antes da
-próxima reunião.
+Digite sua anotação:
+
+> Amanhã preciso revisar o conteúdo de Python,
+> finalizar o exercício de programação e
+> conversar com o professor sobre o trabalho.
 ```
 
-**Exemplo ilustrativo de saída esperada:**
+### Exemplo de saída
 
 ```text
-TÍTULO
-Reunião sobre o projeto
+=== Anotação organizada ===
 
-RESUMO
-A reunião abordou o andamento do projeto,
-a atualização da planilha, o cronograma
-e a revisão dos requisitos.
+Título:
+Organização das atividades acadêmicas
 
-PONTOS IMPORTANTES
-- Atualização da planilha.
-- Discussão do cronograma.
-- Revisão dos requisitos.
+Resumo:
+Planejamento de atividades relacionadas ao
+estudo de Python e ao desenvolvimento de um trabalho.
 
-AÇÕES IDENTIFICADAS
-- Enviar a planilha atualizada.
-  Responsável: João.
-  Prazo: terça-feira.
+Pontos importantes:
+- Revisar o conteúdo de Python.
+- Finalizar o exercício de programação.
+- Conversar com o professor sobre o trabalho.
 
-- Conversar sobre o cronograma.
-  Responsável: Não informado.
-  Prazo: sexta-feira.
-
-- Revisar os requisitos.
-  Responsável: Não informado.
-  Prazo: Não informado.
+Ações:
+- Revisar Python.
+- Finalizar o exercício.
+- Conversar com o professor.
 ```
 
-A saída acima serve para demonstrar o formato pretendido. A resposta efetiva é gerada pelo modelo e pode apresentar variações.
+A resposta apresentada é ilustrativa. O conteúdo efetivamente produzido depende da interpretação realizada pelo modelo de linguagem.
 
-## 11. Testes
+## 9. Tratamento de erros
 
-Para executar os testes automatizados:
+A versão Intermediária amplia o tratamento de falhas para evitar que problemas previsíveis interrompam a aplicação com mensagens técnicas pouco compreensíveis.
+
+Entre os cenários contemplados estão:
+
+| Situação | Comportamento esperado |
+|---|---|
+| Anotação vazia | Rejeição da entrada antes da chamada ao serviço. |
+| Credencial ausente | Exibição de mensagem informando a necessidade de configurar `LLM_API_KEY`. |
+| Endereço ausente ou inválido | Exibição de mensagem indicando problema em `LLM_BASE_URL`. |
+| Modelo não configurado | Exibição de mensagem indicando a necessidade de configurar `LLM_MODEL`. |
+| Credencial inválida | Identificação de erro de autenticação HTTP 401. |
+| Falta de autorização | Identificação de erro HTTP 403. |
+| Modelo ou endpoint não encontrado | Identificação de erro HTTP 404. |
+| Limite de requisições atingido | Identificação de erro HTTP 429. |
+| Serviço indisponível | Tratamento de erros HTTP 5xx. |
+| Falha de conexão | Exibição de mensagem informando a impossibilidade de conexão. |
+| Timeout | Exibição de mensagem informando que o serviço demorou demais para responder. |
+| Resposta vazia ou inválida | Rejeição do conteúdo retornado pelo modelo. |
+| Estrutura inesperada | Exibição de mensagem indicando que não foi possível interpretar a resposta. |
+
+Os erros esperados são tratados e apresentados ao usuário sem a necessidade de exibir um traceback completo no terminal.
+
+## 10. Testes automatizados
+
+O projeto utiliza `unittest` para verificar o comportamento dos módulos e `unittest.mock` para simular componentes externos, especialmente as requisições HTTP.
+
+Para executar a suíte de testes:
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-### Testes simulados
+### Cobertura atual
 
-A suíte inicial utiliza `unittest` e `unittest.mock` para isolar a lógica do organizador da comunicação externa com o modelo.
+Os 22 testes automatizados estão distribuídos entre quatro módulos:
 
-Os testes verificam:
+| Arquivo | Quantidade de testes |
+|---|---:|
+| `test_config.py` | 4 |
+| `test_llm_client.py` | 12 |
+| `test_main.py` | 4 |
+| `test_organizer.py` | 2 |
+| **Total** | **22** |
 
-| Teste | Situação | Resultado esperado |
-|---|---|---|
-| Organização de anotação | Texto válido com espaços excedentes | Texto normalizado e encaminhado ao cliente de LLM. |
-| Rejeição de anotação vazia | Texto composto apenas por espaços | Lançamento de `ValueError`. |
+Os testes verificam, entre outros aspectos:
 
-Esses testes não realizam chamadas reais à NVIDIA NIM. A resposta do cliente de LLM é simulada para permitir verificações determinísticas.
+- Carregamento e validação das configurações.
+- Preparação dos dados da requisição.
+- Tratamento de erros HTTP.
+- Falhas de conexão e timeout.
+- Interpretação de respostas válidas e inválidas.
+- Rejeição de anotações vazias.
+- Comportamento da interface de terminal diante de erros.
 
-### Validação real da integração
+**Resultado da última execução registrada:**
 
-Durante o desenvolvimento, foi realizada uma execução manual utilizando a NVIDIA NIM, com credenciais válidas e o modelo configurado.
+```text
+Ran 22 tests
 
-Essa execução permitiu verificar o fluxo de autenticação, envio da anotação, recebimento da resposta e apresentação do resultado no terminal.
+OK
+```
 
-A validação real depende de conexão com a internet, disponibilidade do serviço e credenciais válidas. Ela não faz parte da suíte automatizada.
+Os testes automatizados utilizam simulações e não dependem de chamadas reais à NVIDIA NIM. Portanto, a aprovação da suíte verifica a lógica implementada, mas não garante, isoladamente, a disponibilidade do serviço externo ou a validade de uma credencial real.
 
-## 12. Tratamento de falhas
+É importante distinguir os dois tipos de validação realizados:
 
-A aplicação contempla algumas situações de erro para evitar que problemas de entrada ou comunicação interrompam o fluxo sem uma mensagem compreensível.
+- **Validação real:** a versão Básica foi executada utilizando a integração com a NVIDIA NIM.
+- **Testes simulados:** os 22 testes automatizados da versão Intermediária utilizam mocks para simular respostas e falhas do serviço externo.
 
-| Situação | Comportamento implementado |
-|---|---|
-| Anotação vazia | A aplicação informa que o texto não pode estar vazio. |
-| Variável de ambiente ausente | O cliente informa qual configuração está faltando. |
-| Tempo limite excedido | Retorna uma mensagem de timeout. |
-| Falha de conexão | Informa que não foi possível conectar ao serviço. |
-| Erro HTTP | Informa o código HTTP retornado. |
-| Falha na interpretação da resposta | Informa que a resposta do modelo não pôde ser interpretada. |
-| Resposta vazia ou inválida | Informa que o modelo retornou conteúdo inválido. |
+Assim, os testes automatizados verificam o comportamento da aplicação em diferentes cenários, mas não representam 22 chamadas reais à API.
 
-A implementação não possui mecanismo de repetição automática de requisições. Falhas temporárias de serviço precisam ser tratadas por uma nova tentativa de execução pelo usuário.
+## 11. Arquitetura e decisões técnicas
 
-## 13. Limitações conhecidas
+A aplicação foi organizada para separar as responsabilidades envolvidas no processamento de uma anotação.
 
-A versão atual representa uma implementação inicial e possui as seguintes limitações:
+O fluxo principal pode ser representado da seguinte maneira:
 
-- A aplicação processa uma anotação por execução.
-- Não há persistência ou recuperação de resultados anteriores.
-- A saída é apresentada como texto, sem validação por um esquema estruturado.
-- Não existem testes automatizados abrangentes para todos os erros de comunicação com a API.
-- A qualidade da organização depende da clareza da anotação e da interpretação do modelo.
-- A disponibilidade da aplicação depende do serviço externo de inferência.
+```text
+Entrada do usuário
+       |
+       v
+    main.py
+       |
+       v
+  organizer.py
+       |
+       v
+   prompts.py
+       |
+       v
+  llm_client.py
+       |
+       +---- config.py
+       |
+       v
+   NVIDIA NIM
+       |
+       v
+ Interpretação da resposta
+       |
+       v
+ Apresentação no terminal
+```
 
-Essas limitações são compatíveis com o escopo do nível Básico e poderão orientar melhorias em etapas posteriores.
+A integração com o serviço externo é realizada diretamente por meio de requisições HTTP utilizando `requests`, sem a adoção de frameworks de agentes ou abstrações adicionais de LLM.
 
-## 14. Vídeo de demonstração
+Essa decisão mantém o fluxo de comunicação explícito e permite controlar diretamente a preparação da requisição, o envio dos dados, o tratamento dos erros e a interpretação da resposta.
 
-**Link:** Pendente de gravação e publicação.
+O módulo `config.py` fornece as configurações utilizadas pelo `llm_client.py`, mantendo a responsabilidade de carregamento e validação separada da comunicação com o serviço externo.
 
-O vídeo será disponibilizado nesta seção após a demonstração da instalação, configuração e execução da aplicação.
+## 12. Limitações conhecidas
 
-## 15. Relatório de execução
+Apesar da evolução da estrutura e do tratamento de erros, algumas limitações permanecem:
 
-O histórico de desenvolvimento, as decisões técnicas, os resultados dos testes, as dificuldades encontradas e o uso de ferramentas de inteligência artificial estão registrados em:
+- A qualidade da organização depende da interpretação realizada pelo modelo de linguagem.
+- O modelo pode interpretar expressões ambíguas como possíveis ações.
+- A aplicação depende da disponibilidade do serviço externo.
+- Não existe uma etapa independente de validação semântica para verificar se todas as informações produzidas correspondem fielmente à anotação original.
+- A interface permanece restrita ao terminal.
 
-[`RELATORIO_EXECUCAO.md`](RELATORIO_EXECUCAO.md)
+Essas limitações podem ser abordadas em etapas futuras do desenvolvimento.
 
+## 13. Demonstração
 
-## 16. Licença
+A demonstração em vídeo da versão Intermediária será disponibilizada após a gravação e validação da execução correspondente.
 
-Consulte o arquivo `LICENSE` para informações sobre a licença do projeto.
+A demonstração da versão Básica está disponível em:
 
-## Demonstração
+[Assistir à demonstração do P0 Básico](https://youtu.be/LAK1vtOupLo)
 
-Confira o vídeo de demonstração do Note Organizer:
+## 14. Relatório de execução
 
-[Assistir à demonstração no YouTube](https://youtu.be/LAK1vtOupLo)
+O arquivo `RELATORIO_EXECUCAO.md` apresenta o histórico de desenvolvimento, as decisões técnicas, os testes realizados, as dificuldades encontradas e a utilização de ferramentas de inteligência artificial durante o projeto.
+
+## 15. Licença
+
+Este projeto está disponibilizado sob a licença definida no arquivo `LICENSE`.
