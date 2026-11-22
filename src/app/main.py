@@ -1,5 +1,7 @@
+
 from app.organizer import organize_note
 from app.llm_client import LLMClientError
+from app.config import ConfigurationError
 
 
 def main():
@@ -13,7 +15,7 @@ def main():
 
     try:
         result = organize_note(note)
-    except (LLMClientError, ValueError) as error:
+    except (ConfigurationError, LLMClientError) as error:
         print(f"\nErro: {error}")
         return
 
